@@ -70,6 +70,7 @@ class userController {
         }
         const userQuiz = {
             user_obj:user.toObject(),
+            quiz_id,
             start_time,
             end_time:quizEndTime,
             option_list:option_list,
@@ -81,10 +82,12 @@ class userController {
         }
 
         user.quizes.push(userQuiz)
+        quiz.user_list.push(userQuiz)
 
         try {
             await user.save()
-            return res.json({status:"success",message:"user quiz added successfully",user})
+            await quiz.save()
+            return res.status(200).json({status:"success",message:"user quiz added successfully",user})
         } catch (error) {
             console.log(error);
             return res.status(400).json({"stutus":"failed",error:error.message})
@@ -116,7 +119,7 @@ class userController {
         res.json({status:"success",highestScore})
         
         } catch (error) {
-            console.log(error);
+            return res.status(400).json({"stutus":"failed",error:error.message})
         }
 
 
@@ -125,25 +128,47 @@ class userController {
     //update user question
     static updateQuestion =async(req,res)=>{
         const {user_id,quiz_id,question_id}=req.params
-        const {option} =req.body
+        const {option,marks,is_answer} =req.body
 
         try {
             const user =await userModel.findById(user_id)
             const quiz =await quizModel.findById(quiz_id)
         
-            
+            // console.log(user);
             if (!user) {
                 return res.status(400).json({"stutus":"failed","message":"User not found"})
-
             }
 
             if (!quiz) {
                 return res.status(400).json({"stutus":"failed","message":"Quiz not found"})
-
             }
 
-        } catch (error) {
+            let question;
+            for (let quiz of user.quizes){
+
+                if (quiz.option_list.some(option=>option.question_id==question_id)) {
+                    question=true
+                }
+            }
+            if (!question) {
+                return res.status(400).json({"stutus":"failed","message":"Question not found"})
+            }
+
+
+            const updated=await userModel.findOneAndUpdate({_id:user_id,'quizes.option_list.question_id':question_id},
+            {$set:{
+                'quizes.$.option_list.$[element].option':option,
+                'quizes.$.option_list.$[element].marks':marks,
+                'quizes.$.option_list.$[element].is_answer':is_answer,
+            }},
+            {arrayFilters:[{'element.question_id':question_id}],new:true})
+
+
+            res.send({updated})
+
             
+        } catch (error) {
+            return res.status(400).json({"stutus":"failed",error:error.message})
         }
     }
 }

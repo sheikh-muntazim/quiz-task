@@ -4,7 +4,7 @@ const optionListSchema =new mongoose.Schema({
     question_id:{type:mongoose.Schema.Types.ObjectId},  
     option:{type:String}, 
     marks:{type:Number},
-    is_answer:{type:Boolean},
+    is_answer:{type:Boolean}
 })
 
 const userSchema=new mongoose.Schema({
@@ -17,6 +17,7 @@ address: { type: String },
 city: { type: String },
 quizes:[{
     user_obj:{},
+    quiz_id:{type:mongoose.Schema.Types.ObjectId},
     start_time:{type:String},
     end_time:{type:String},
     option_list:[optionListSchema],

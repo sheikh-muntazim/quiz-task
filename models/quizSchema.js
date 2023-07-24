@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
 import { userSchema } from "./userSchema.js";
 
-const questionOptionsSchema = mongoose.Schema({
+const questionOptionsSchema =new mongoose.Schema({
     option:{type:String},
     is_answer:{type:Boolean,default:false}
 
 })
 
-const questionSchema =mongoose.Schema({
+const questionSchema =new mongoose.Schema({
     question:{type:String},
     mark:{type:Number},
     option_list:[questionOptionsSchema]
